@@ -105,7 +105,7 @@ def third_request(ReportSession, ControlID):
     return content
 
 
-def print_csv_data(csv_content):
+def get_dataframe(csv_content):
 
     cr = csv.reader(csv_content.splitlines(), delimiter=',')
     my_list = list(cr)
@@ -162,4 +162,4 @@ pointCodeDict = get_point_code_dict(points)
 ViewState, ViewStateGenerator, EventValidation = first_request()
 rs, ci = second_request(ViewState, ViewStateGenerator, EventValidation, pointCodeDict)
 raw_csv = third_request(rs, ci)
-print_csv_data(raw_csv)
+get_dataframe(raw_csv)
