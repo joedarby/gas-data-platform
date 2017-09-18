@@ -1,8 +1,7 @@
 import requests
 import pandas as pd
 import csv
-import get_NG_data
-'''
+
 
 url = 'http://mip-prod-web.azurewebsites.net/InstantaneousViewFileDownload/DownloadFile'
 
@@ -17,10 +16,10 @@ df = pd.DataFrame.from_records(data, columns=labels)
 
 df = df[(df['Expired (Y/N)'] == 'Y') | (df['Expired (Y/N)'] == 'N')]
 
+df = df.pivot(index='Timestamp', columns='System Entry Name', values='Value')
+
 print(df)
 print(df.dtypes)
 
-'''
 
-get_NG_data.get_and_send_data()
 
