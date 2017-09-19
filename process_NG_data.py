@@ -8,15 +8,15 @@ import csv
 import pandas as pd
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
-from DB_Helper import Flow
-from DB_Helper import Base
+from Flow_ORM import Flow
+from Flow_ORM import Base
 
 pd.set_option('display.width', 9999)
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-#rds_host = os.environ['RDS_Instance_Endpoint']
+#rds_host = os.getenv('RDS_Instance_Endpoint')
 rds_host = 'rds-mysql-10mintutorial.csomj93pkcws.eu-west-2.rds.amazonaws.com'
 name = rds_config.db_username
 password = rds_config.db_password
@@ -28,14 +28,14 @@ engine = sqlalchemy.create_engine(connection_string, echo=True)
 
 Session = sessionmaker(bind=engine)
 Base.metadata.create_all(engine)
-#session = Session()
+session = Session()
 
 
 def lambda_handler(event, context):
     message = event['Records'][0]['sns']['message']
     #test_sns_topic_arn = os.environ['Test_SNS_Topic_ARN']
     #publish_result(test_sns_topic_arn, message)
-    '''
+
     df = message_to_dataframe(message)
     records = df.to_dict('records')
     for r in records:
@@ -47,7 +47,7 @@ def lambda_handler(event, context):
         session.merge(new_flow)
 
     session.commit()
-    '''
+
 
     connection = engine.connect()
     result = connection.execute("select * from ORMTest2 WHERE timestamp>'2017-09-19 00:15:00' AND location='ALDBROUGH'")

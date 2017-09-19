@@ -3,7 +3,7 @@ import boto3
 import os
 
 def lambda_handler(event, context):
-    #url = os.environ['NG_Terminal_URL']
+    #url = os.getenv('NG_Terminal_URL')
     url = 'http://mip-prod-web.azurewebsites.net/InstantaneousViewFileDownload/DownloadFile'
     #sns_topic_arn = os.environ['SNS_Topic_ARN']
     sns_topic_arn = 'null'
