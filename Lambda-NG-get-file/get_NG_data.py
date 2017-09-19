@@ -4,8 +4,8 @@ import os
 
 def lambda_handler(event, context):
     url = os.getenv('NG_Terminal_URL')
-    sns_topic_arn = os.environ['SNS_Topic_ARN']
-    get_and_send_data(url, sns_topic_arn)
+    sns_topic_arn = os.getenv('SNS_Topic_ARN')
+    return get_and_send_data(url, sns_topic_arn)
 
 def get_and_send_data(url, sns_topic_arn):
 
