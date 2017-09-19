@@ -1,15 +1,13 @@
-import os
-import sys
-import boto3
-import rds_config
-import pymysql
-import logging
 import csv
+import logging
+
+import boto3
 import pandas as pd
+import rds_config
 import sqlalchemy
-from sqlalchemy.orm import sessionmaker
-from Flow_ORM import Flow
 from Flow_ORM import Base
+from Flow_ORM import Flow
+from sqlalchemy.orm import sessionmaker
 
 pd.set_option('display.width', 9999)
 
@@ -47,13 +45,6 @@ def lambda_handler(event, context):
         session.merge(new_flow)
 
     session.commit()
-
-
-    connection = engine.connect()
-    result = connection.execute("select * from ORMTest2 WHERE timestamp>'2017-09-19 00:15:00' AND location='ALDBROUGH'")
-    for row in result:
-        print(row)
-    connection.close()
 
 
 def publish_result(test_snsn_topic_arn, message):

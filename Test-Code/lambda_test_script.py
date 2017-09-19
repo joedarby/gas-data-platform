@@ -1,6 +1,6 @@
-import process_NG_data
 import get_NG_data
 
+import process_NG_data
 
 message = get_NG_data.lambda_handler(None, None)
 

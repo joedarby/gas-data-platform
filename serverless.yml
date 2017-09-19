@@ -11,7 +11,7 @@
 #
 # Happy Coding!
 
-service: my-service
+service: gas-data
 
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
@@ -56,8 +56,8 @@ provider:
 #    - exclude-me-dir/**
 
 functions:
-  NG_get_file:
-    handler: get_NG_data.lambda_handler
+  NG-get-file:
+    handler: Lambda-Code/get_NG_data.lambda_handler
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
@@ -91,6 +91,13 @@ functions:
     environment:
       NG_Terminal_URL: http://mip-prod-web.azurewebsites.net/InstantaneousViewFileDownload/DownloadFile
       SNS_Topic_ARN: arn:aws:sns:eu-west-2:451093560309:NG_terminals
+
+  NG-process-data:
+    handler: Lambda-Code/process_NG_data.lambda_handler
+    events:
+      - sns: arn:aws:sns:eu-west-2:451093560309:NG_terminals
+    environment:
+
 
 # you can add CloudFormation resource templates here
 #resources:
