@@ -13,7 +13,7 @@ functions:
   NG-get-file:
     handler: get_NG_data.lambda_handler
     events:
-      - schedule: rate(1 hour)
+      - schedule: rate(6 minutes)
     environment:
       NG_Terminal_URL: http://mip-prod-web.azurewebsites.net/InstantaneousViewFileDownload/DownloadFile
       SNS_Topic_ARN: arn:aws:sns:eu-west-2:451093560309:NG_terminals
@@ -27,7 +27,7 @@ functions:
     events:
       - sns: arn:aws:sns:eu-west-2:451093560309:NG_terminals
     environment:
-      RDS_Instance_Endpoint: rds-mysql-10mintutorial.csomj93pkcws.eu-west-2.rds.amazonaws.com
+      RDS_Instance_Endpoint: gasdb.csomj93pkcws.eu-west-2.rds.amazonaws.com
       Test_SNS_Topic_ARN: arn:aws:sns:eu-west-2:451093560309:NG_test
     package:
       include:

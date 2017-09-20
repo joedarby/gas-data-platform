@@ -4,7 +4,7 @@ from sqlalchemy import Column, INTEGER, TIMESTAMP, CHAR, FLOAT
 Base = declarative_base()
 
 class Flow(Base):
-    __tablename__ = 'ORMTest2'
+    __tablename__ = 'NGData'
 
     id = Column(CHAR(60), primary_key=True)
     timestamp = Column(TIMESTAMP)

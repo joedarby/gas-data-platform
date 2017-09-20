@@ -15,33 +15,37 @@ password = rds_config.db_password
 db_name = rds_config.db_name
 
 connection_string = "mysql+pymysql://" + name + ":" + password + "@" + rds_host + "/" + db_name
-engine = sqlalchemy.create_engine(connection_string, echo=True)
-
-Session = sessionmaker(bind=engine)
-Base.metadata.create_all(engine)
-session = Session()
-
 
 def lambda_handler(event, context):
-    message = event['Records'][0]['Sns']['Message']
     test_sns_topic_arn = os.environ['Test_SNS_Topic_ARN']
+    try:
+        engine = sqlalchemy.create_engine(connection_string, echo=True)
 
-    records = message_to_records(message)
-    for r in records:
-        timestamp = str(r['Timestamp'])
-        location = r['System Entry Name']
-        value = r['Value']
-        id = timestamp + ' ' + location
-        new_flow = Flow(id=id, timestamp=timestamp, location=location, value=value)
-        session.merge(new_flow)
+        Session = sessionmaker(bind=engine)
+        Base.metadata.create_all(engine)
+        session = Session()
 
-    session.commit()
+        message = event['Records'][0]['Sns']['Message']
+        records = message_to_records(message)
+        for r in records:
+            timestamp = str(r['Timestamp'])
+            location = r['System Entry Name']
+            value = r['Value']
+            id = timestamp + ' ' + location
+            new_flow = Flow(id=id, timestamp=timestamp, location=location, value=value)
+            session.merge(new_flow)
 
-    publish_result(test_sns_topic_arn, message)
+        session.commit()
+        session.close()
+        engine.dispose()
+
+    except Exception as e:
+        error_msg = str(e)
+        publish_result(test_sns_topic_arn, error_msg)
 
 
 def publish_result(test_sns_topic_arn, message):
-    message_to_pub = "DATABASE UPDATED\n\n" + message
+    message_to_pub = "DATABASE ERROR\n\n" + message
     sns = boto3.client('sns')
     sns.publish(TargetArn=test_sns_topic_arn,
                 Message=message_to_pub)

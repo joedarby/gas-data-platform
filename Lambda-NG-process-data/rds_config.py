@@ -1,3 +1,3 @@
-db_name = 'TutorialDB'
-db_username = 'masterUsername'
-db_password = 'longpassword4'
+db_name = 'gas_db'
+db_username = 'master'
+db_password = 'banana123'
