@@ -2,24 +2,18 @@ import csv
 import os
 
 import boto3
-import rds_config
-import sqlalchemy
 from datetime import datetime
 from Flow_ORM import Base
 from Flow_ORM import Flow
+import Connection
 from sqlalchemy.orm import sessionmaker
 
-rds_host = os.getenv('RDS_Instance_Endpoint')
-name = rds_config.db_username
-password = rds_config.db_password
-db_name = rds_config.db_name
-
-connection_string = "mysql+pymysql://" + name + ":" + password + "@" + rds_host + "/" + db_name
+rds_endpoint = os.getenv('RDS_Instance_Endpoint')
 
 def lambda_handler(event, context):
     test_sns_topic_arn = os.environ['Test_SNS_Topic_ARN']
     try:
-        engine = sqlalchemy.create_engine(connection_string, echo=True)
+        engine = Connection.get_db_engine(rds_endpoint)
 
         Session = sessionmaker(bind=engine)
         Base.metadata.create_all(engine)

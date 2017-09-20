@@ -1,23 +1,28 @@
 import sqlalchemy
 import sys
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import or_, and_
+from datetime import datetime
 
-sys.path.insert(0, '/home/joe/PycharmProjects/gas-data-platform/Lambda-NG-process-data')
-import rds_config
+sys.path.insert(0, '/home/joe/PycharmProjects/gas-data-platform/DB_Tools')
+import Connection
+from Flow_ORM import Flow
 
-rds_host = 'gasdb.csomj93pkcws.eu-west-2.rds.amazonaws.com'
-name = rds_config.db_username
-password = rds_config.db_password
-db_name = rds_config.db_name
+rds_endpoint = 'gasdb.csomj93pkcws.eu-west-2.rds.amazonaws.com'
 
-connection_string = "mysql+pymysql://" + name + ":" + password + "@" + rds_host + "/" + db_name + "?connect_timeout=20"
-engine = sqlalchemy.create_engine(connection_string, echo=True)
+def lambda_handler(event, context)
 
-conn = engine.connect()
+engine = Connection.get_db_engine(rds_endpoint)
 
-res = conn.execute("SELECT * FROM NGData")
+Session = sessionmaker(bind=engine)
+session = Session()
 
-for r in res:
-    print(r)
+#results = session.query(Flow).filter(and_(Flow.location == 'ALDBROUGH', Flow.timestamp < datetime(2017,9,20,16,45)))
+results = session.query(Flow).filter(or_(Flow.location == 'ALDBROUGH', Flow.location == "HILLTOP"))
 
-conn.close()
+for r in results:
+    print(r.timestamp, " ", r.location, "\t", r.value)
+
+print("\n\n")
+session.close()
 engine.dispose()
