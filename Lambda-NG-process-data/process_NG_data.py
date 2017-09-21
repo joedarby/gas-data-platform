@@ -9,9 +9,10 @@ import Connection
 from sqlalchemy.orm import sessionmaker
 
 rds_endpoint = os.getenv('RDS_Instance_Endpoint')
+sns_error_arn = os.environ['SNS_Error_ARN']
 
 def lambda_handler(event, context):
-    test_sns_topic_arn = os.environ['Test_SNS_Topic_ARN']
+
     try:
         engine = Connection.get_db_engine(rds_endpoint)
 
@@ -35,13 +36,13 @@ def lambda_handler(event, context):
 
     except Exception as e:
         error_msg = str(e)
-        publish_result(test_sns_topic_arn, error_msg)
+        publish_error(error_msg)
 
 
-def publish_result(test_sns_topic_arn, message):
+def publish_error(message):
     message_to_pub = "DATABASE ERROR\n\n" + message
     sns = boto3.client('sns')
-    sns.publish(TargetArn=test_sns_topic_arn,
+    sns.publish(TargetArn=sns_error_arn,
                 Message=message_to_pub)
 
 

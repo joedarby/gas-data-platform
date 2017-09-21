@@ -1,8 +1,74 @@
 import requests
-import csv
-import pandas as pd
+import boto3
+import os
 
-cookie = {'ASP.NET_SessionId': 'clq2tye2r5f4csoyk4apagj3'}
+points = ['Bocholtz TENP',
+              'Bocholtz Vetschau',
+              'Dinxperlo',
+              'Emden EPT',
+              'Emden NPT',
+              'Haanrade',
+              'Hilvarenbeek',
+              'Julianadorp',
+              'Obbicht',
+              'Oude Gascade',
+              'Oude GTG Nord',
+              'Oude GUD-G',
+              'Oude GUD-H',
+              'Oude OGE',
+              'S-Grav',
+              'Tegelen',
+              'Vlieghuis',
+              'Winterswijk',
+              'Zandvliet-G',
+              'Zandvliet-H',
+              'Zelzate',
+              'Zevenaar',
+              'Zone Oude Statenzijl'
+              ]
+
+sns_topic_arn = os.getenv('SNS_Topic_ARN')
+sns_error_arn = os.getenv('SNS_Error_ARN')
+
+
+def lambda_handler(event, context):
+    try_count = 0
+    error = ""
+    while try_count < 3:
+        try:
+            raw_csv = get_csv_data(points)
+            publish_to_sns(raw_csv)
+            return
+        except Exception as e:
+            try_count += 1
+            error = str(e)
+            continue
+    publish_error(error)
+
+
+def get_csv_data(points):
+    pointCodeDict = get_point_code_dict(points)
+    viewState, viewStateGenerator, eventValidation, cookie = first_request()
+    print(cookie)
+    rs, ci = second_request(viewState, viewStateGenerator, eventValidation, cookie, pointCodeDict)
+    raw_csv = third_request(rs, ci, cookie)
+
+    return raw_csv
+
+
+def publish_to_sns(data_string):
+    sns = boto3.client('sns')
+
+    sns.publish(TargetArn=sns_topic_arn,
+                Message=data_string
+                )
+
+
+def publish_error(message):
+    message_to_pub = "GTS DOWNLOAD ERROR\n\n" + message
+    sns = boto3.client('sns')
+    sns.publish(TargetArn=sns_error_arn,
+                Message=message_to_pub)
 
 
 def first_request():
@@ -18,18 +84,19 @@ def first_request():
                'Upgrade-Insecure-Requests': '1'
                }
 
-    resp = requests.get(url = url, params=params, cookies = cookie, headers = headers)
+    resp = requests.get(url = url, params=params, headers = headers)
     content = str(resp.content)
+    cookie = resp.cookies.get_dict()
     ViewState = content.split("id=\"__VIEWSTATE\" value=\"", 1)[1].split("\"", 1)[0]
     ViewStateGenerator = content.split("id=\"__VIEWSTATEGENERATOR\" value=\"", 1)[1].split("\"", 1)[0]
     EventValidation = content.split("id=\"__EVENTVALIDATION\" value=\"", 1)[1].split("\"", 1)[0]
 
     print("First request complete")
 
-    return ViewState, ViewStateGenerator, EventValidation
+    return ViewState, ViewStateGenerator, EventValidation, cookie
 
 
-def second_request(ViewState, ViewStateGenerator, EventValidation, pointCodeDict):
+def second_request(ViewState, ViewStateGenerator, EventValidation, cookie, pointCodeDict):
     url = 'http://dataport.gastransportservices.nl/default.aspx'
 
     params = {'ReportPath': '/Transparency/FlowHsWobbePerNetworkpoint',
@@ -68,6 +135,7 @@ def second_request(ViewState, ViewStateGenerator, EventValidation, pointCodeDict
     headers = {'Host': 'dataport.gastransportservices.nl',
                'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:55.0) Gecko/20100101 Firefox/55.0',
                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+               'Connection': 'keep-alive'
                }
 
     resp = requests.post(url=url, cookies=cookie, params=params, data=form_data, headers= headers)
@@ -81,7 +149,7 @@ def second_request(ViewState, ViewStateGenerator, EventValidation, pointCodeDict
 
     return rs, ci
 
-def third_request(ReportSession, ControlID):
+def third_request(ReportSession, ControlID, cookie):
     url = 'http://dataport.gastransportservices.nl/Reserved.ReportViewerWebControl.axd'\
 
     params = {
@@ -101,20 +169,10 @@ def third_request(ReportSession, ControlID):
 
     resp = requests.get(url=url, params=params, cookies=cookie)
     content = resp.content.decode('utf-8')
+    print("third request complete")
 
     return content
 
-
-def get_dataframe(csv_content):
-
-    cr = csv.reader(csv_content.splitlines(), delimiter=',')
-    my_list = list(cr)
-    labels = my_list[3]
-    data = my_list[4:]
-
-    df = pd.DataFrame.from_records(data, columns=labels)
-
-    print(df)
 
 def get_point_code_dict(pointStringList):
 
@@ -154,12 +212,5 @@ def get_point_code_dict(pointStringList):
 
     return pointCodeDict
 
+lambda_handler(None, None)
 
-points = ['Zevenaar', 'Hilvarenbeek', 'Zelzate']
-
-pointCodeDict = get_point_code_dict(points)
-
-ViewState, ViewStateGenerator, EventValidation = first_request()
-rs, ci = second_request(ViewState, ViewStateGenerator, EventValidation, pointCodeDict)
-raw_csv = third_request(rs, ci)
-get_dataframe(raw_csv)
