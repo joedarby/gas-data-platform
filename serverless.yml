@@ -26,7 +26,7 @@ functions:
     handler: get_GTS_data.lambda_handler
     timeout: 30
     events:
-      - schedule: cron(0/5 * * * ? *)
+      - schedule: cron(5 0/1 * * ? *)
     environment:
       SNS_Topic_ARN: arn:aws:sns:eu-west-2:451093560309:GTS_Terminals
       SNS_Error_ARN: arn:aws:sns:eu-west-2:451093560309:NG_test

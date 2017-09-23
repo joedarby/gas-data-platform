@@ -1,55 +1,70 @@
 import requests
 import boto3
 import os
+import sys
 
-points = ['Bocholtz TENP',
-              'Bocholtz Vetschau',
-              'Dinxperlo',
-              'Emden EPT',
-              'Emden NPT',
-              'Haanrade',
-              'Hilvarenbeek',
-              'Julianadorp',
-              'Obbicht',
-              'Oude Gascade',
-              'Oude GTG Nord',
-              'Oude GUD-G',
-              'Oude GUD-H',
-              'Oude OGE',
-              'S-Grav',
-              'Tegelen',
-              'Vlieghuis',
-              'Winterswijk',
-              'Zandvliet-G',
-              'Zandvliet-H',
-              'Zelzate',
-              'Zevenaar',
-              'Zone Oude Statenzijl'
-              ]
 
-sns_topic_arn = os.getenv('SNS_Topic_ARN')
-sns_error_arn = os.getenv('SNS_Error_ARN')
+pointCodes = [{'Bocholtz TENP': '01',
+              'Bocholtz Vetschau': '02',
+              'Dinxperlo': '03'},
+              {'Emden EPT':'04',
+              'Emden NPT': '05',
+              'Haanrade': '06'},
+              {'Hilvarenbeek': '07',
+              'Julianadorp': '08',
+              'Obbicht': '09'},
+              {'Oude Gascade': '10',
+              'Oude GTG Nord': '11',
+              'Oude GUD-G': '12'},
+              {'Oude GUD-H': '13',
+              'Oude OGE': '14',
+              'S-Grav': '15'},
+              {'Tegelen': '16',
+              'Vlieghuis': '17',
+              'Winterswijk': '18'},
+              {'Zandvliet-G': '19',
+              'Zandvliet-H': '20',
+              'Zelzate': '21'},
+              {'Zevenaar': '22',
+              'Zone Oude Statenzijl': '23'
+              }]
 
+#sns_topic_arn = os.getenv('SNS_Topic_ARN')
+#sns_error_arn = os.getenv('SNS_Error_ARN')
+sns_topic_arn = "arn:aws:sns:eu-west-2:451093560309:GTS_Terminals"
+sns_error_arn = "arn:aws:sns:eu-west-2:451093560309:NG_test"
 
 def lambda_handler(event, context):
+    vs, vsg, ev, cookie, = establish_connection()
+    for group in pointCodes:
+        try_count = 0
+        while try_count < 3:
+            try:
+                raw_csv = get_csv_data(group, vs, vsg, ev, cookie)
+                publish_to_sns(raw_csv)
+                break
+            except Exception as e:
+                try_count += 1
+                if try_count == 3:
+                    publish_error(str(e))
+
+
+def establish_connection():
     try_count = 0
     error = ""
     while try_count < 3:
         try:
-            raw_csv = get_csv_data(points)
-            publish_to_sns(raw_csv)
-            return
+            viewState, viewStateGenerator, eventValidation, cookie = first_request()
+            return viewState, viewStateGenerator, eventValidation, cookie
         except Exception as e:
             try_count += 1
             error = str(e)
             continue
     publish_error(error)
+    sys.exit()
 
-
-def get_csv_data(points):
+def get_csv_data(points, viewState, viewStateGenerator, eventValidation, cookie):
     pointCodeDict = get_point_code_dict(points)
-    viewState, viewStateGenerator, eventValidation, cookie = first_request()
-    print(cookie)
     rs, ci = second_request(viewState, viewStateGenerator, eventValidation, cookie, pointCodeDict)
     raw_csv = third_request(rs, ci, cookie)
 
@@ -174,39 +189,14 @@ def third_request(ReportSession, ControlID, cookie):
     return content
 
 
-def get_point_code_dict(pointStringList):
-
-    pointCodes = {'Bocholtz TENP': '01',
-              'Bocholtz Vetschau': '02',
-              'Dinxperlo': '03',
-              'Emden EPT':'04',
-              'Emden NPT': '05',
-              'Haanrade': '06',
-              'Hilvarenbeek': '07',
-              'Julianadorp': '08',
-              'Obbicht': '09',
-              'Oude Gascade': '10',
-              'Oude GTG Nord': '11',
-              'Oude GUD-G': '12',
-              'Oude GUD-H': '13',
-              'Oude OGE': '14',
-              'S-Grav': '15',
-              'Tegelen': '16',
-              'Vlieghuis': '17',
-              'Winterswijk': '18',
-              'Zandvliet-G': '19',
-              'Zandvliet-H': '20',
-              'Zelzate': '21',
-              'Zevenaar': '22',
-              'Zone Oude Statenzijl': '23'
-              }
+def get_point_code_dict(pointDict):
 
     keyString = 'ReportViewerControl$ctl04$ctl05$divDropDown$ctl'
 
     pointCodeDict = {}
 
-    for point in pointStringList:
-        code = pointCodes.get(point)
+    for point in pointDict.keys():
+        code = pointDict.get(point)
         key = keyString + code
         pointCodeDict[key] = 'on'
 
