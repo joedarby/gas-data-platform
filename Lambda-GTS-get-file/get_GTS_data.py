@@ -202,5 +202,4 @@ def get_point_code_dict(pointDict):
 
     return pointCodeDict
 
-lambda_handler(None, None)
 
