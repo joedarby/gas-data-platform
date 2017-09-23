@@ -6,8 +6,7 @@ from datetime import datetime
 import Connection
 import Flow_ORM
 
-#rds_endpoint = os.getenv('RDS_Instance_Endpoint')
-rds_endpoint = "gasdb.csomj93pkcws.eu-west-2.rds.amazonaws.com"
+rds_endpoint = os.getenv('RDS_Instance_Endpoint')
 
 def lambda_handler(event, context):
 
@@ -22,8 +21,6 @@ def lambda_handler(event, context):
 
     session.close()
     engine.dispose()
-
-    print(response)
 
     return response
 
@@ -71,10 +68,10 @@ def create_response(results):
                 direction = "Entry"
             time = timestamp.strftime('%d/%m/%Y %H:%M')
             if location in response.keys():
-                response[location][time] = value
+                response[location][time] = {direction: value}
             else:
                 response[location] = {}
-                response[location][time] = value
+                response[location][time] = {direction: value}
         outputJson = {"statusCode": 200, "headers": {"Content-Type": "application/json"}, "body": str(response)}
     else:
         outputJson = {"statusCode": 404, "headers": {"Content-Type": "application/json"}}
