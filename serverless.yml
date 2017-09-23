@@ -62,15 +62,15 @@ functions:
         - DB_Tools
       artifact: _build/gas-data-dev-GTS-process-data.zip
 
-  NG-query-data:
-    handler: query_NG_data.lambda_handler
+  query-data:
+    handler: query_data.lambda_handler
     environment:
       RDS_Instance_Endpoint: gasdb.csomj93pkcws.eu-west-2.rds.amazonaws.com
     package:
       include:
-        - Lambda-NG-API-Query
+        - Lambda-API-Query
         - DB_Tools
-      artifact: _build/gas-data-dev-NG-query-data.zip
+      artifact: _build/gas-data-dev-query-data.zip
 
 
 plugins:

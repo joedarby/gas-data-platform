@@ -1,41 +1,27 @@
 import sys
-import csv
-from datetime import datetime
+import requests
+from pprint import pprint
+import json
 
-sys.path.insert(0, '/home/joe/PycharmProjects/gas-data-platform/Lambda-GTS-get-file')
+sys.path.insert(0, '/home/joe/PycharmProjects/gas-data-platform/Lambda-API-Query')
 sys.path.insert(1, '/home/joe/PycharmProjects/gas-data-platform/DB_Tools')
 
-import get_GTS_data
-import Flow_ORM
+import query_data
 
-group = {'Bocholtz TENP': '01',
-              'Bocholtz Vetschau': '02',
-              'Dinxperlo': '03'}
-
-vs, vsg, ev, cookie, = get_GTS_data.establish_connection()
-message = get_GTS_data.get_csv_data(group, vs, vsg, ev, cookie)
+def query_directly():
+    event = {'body': "{'grid': 'GTS', 'type':'no_filter'}"}
+    query_data.lambda_handler(event, None)
 
 
-def message_to_records(message):
-    cr = csv.reader(message.splitlines(), delimiter=',')
-    data_list = list(cr)
-    records = []
+def query_via_api():
 
-    for row in data_list[4:-1]:
-        name = row[1]
-        if row[3] == '':
-            direction = "Exit"
-            value = int(row[4])
-        else:
-            direction = "Entry"
-            value = int(row[3])
-        timestamp = row[2]
-        timestamp_dt = datetime.strptime(timestamp, '%d-%m-%Y %H:%M')
-        record = {'Timestamp': timestamp_dt, 'Location': name, 'Value': value, 'Direction': direction}
-        print(record)
+    url = "https://53h0uj4c71.execute-api.eu-west-2.amazonaws.com/beta/gas"
+    data = {'grid': 'GTS', 'type': 'no_filter'}
 
-        records.append(record)
+    resp = requests.post(url=url, json=data)
 
-    return records
+    resp_content = eval(resp.content.decode("utf-8"))
 
-message_to_records(message)
+    pprint(resp_content)
+
+query_via_api()
