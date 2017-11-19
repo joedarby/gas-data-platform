@@ -14,8 +14,8 @@ def query_directly():
 
 def query_via_api():
 
-    url = "https://53h0uj4c71.execute-api.eu-west-2.amazonaws.com/beta/gas"
-    data = {"grid": "GTS", "type":"location", "location": "ZEVENAAR"}
+    url = "https://wjvfbfyc7c.execute-api.eu-west-2.amazonaws.com/dev/lambda_handler"
+    data = {"grid": "NG", "type":"timeframe", "from":"18/11/2017 21:00"}
 
     resp = requests.post(url=url, json=data)
 

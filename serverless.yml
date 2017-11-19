@@ -5,73 +5,21 @@ provider:
   runtime: python3.6
   role: arn:aws:iam::451093560309:role/service-role/gasDataRole
   region: eu-west-2
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - SNS:Publish
+      Resource:
+        Ref: SNSTopicNGProcess
+    - Effect: Allow
+      Action:
+        - SNS:Publish
+      Resource:
+        Ref: SNSTopicNGError
+
 
 package:
   individually: true
-
-functions:
-  NG-get-file:
-    handler: get_NG_data.lambda_handler
-    events:
-      - schedule: rate(6 minutes)
-    environment:
-      NG_Terminal_URL: http://mip-prod-web.azurewebsites.net/InstantaneousViewFileDownload/DownloadFile
-      SNS_Topic_ARN: arn:aws:sns:eu-west-2:451093560309:NG_terminals
-    package:
-      include:
-        - Lambda-NG-get-file
-      artifact: _build/gas-data-dev-NG-get-file.zip
-
-  GTS-get-file:
-    handler: get_GTS_data.lambda_handler
-    timeout: 120
-    memorySize: 256
-    events:
-      - schedule: cron(5 0/1 * * ? *)
-    environment:
-      SNS_Topic_ARN: arn:aws:sns:eu-west-2:451093560309:GTS_Terminals
-      SNS_Error_ARN: arn:aws:sns:eu-west-2:451093560309:NG_test
-    package:
-      include:
-        - Lambda-GTS-get-file
-      artifact: _build/gas-data-dev-GTS-get-file.zip
-
-  NG-process-data:
-    handler: process_NG_data.lambda_handler
-    events:
-      - sns: arn:aws:sns:eu-west-2:451093560309:NG_terminals
-    environment:
-      RDS_Instance_Endpoint: gasdb.csomj93pkcws.eu-west-2.rds.amazonaws.com
-      SNS_Error_ARN: arn:aws:sns:eu-west-2:451093560309:NG_test
-    package:
-      include:
-        - Lambda-NG-process-data
-        - DB_Tools
-      artifact: _build/gas-data-dev-NG-process-data.zip
-
-  GTS-process-data:
-    handler: process_GTS_data.lambda_handler
-    events:
-      - sns: arn:aws:sns:eu-west-2:451093560309:GTS_Terminals
-    environment:
-      RDS_Instance_Endpoint: gasdb.csomj93pkcws.eu-west-2.rds.amazonaws.com
-      SNS_Error_ARN: arn:aws:sns:eu-west-2:451093560309:NG_test
-    package:
-      include:
-        - Lambda-GTS-process-data
-        - DB_Tools
-      artifact: _build/gas-data-dev-GTS-process-data.zip
-
-  query-data:
-    handler: query_data.lambda_handler
-    environment:
-      RDS_Instance_Endpoint: gasdb.csomj93pkcws.eu-west-2.rds.amazonaws.com
-    package:
-      include:
-        - Lambda-API-Query
-        - DB_Tools
-      artifact: _build/gas-data-dev-query-data.zip
-
 
 plugins:
   - serverless-package-python-functions
@@ -81,3 +29,82 @@ custom:
     buildDir: _build
     requirementsFile: 'requirements.txt'
     cleanup: true
+  stage: ${opt:stage, self:provider.stage}
+  region: ${opt:region, self:provider.region}
+
+functions:
+  getFileNG:
+    handler: get_NG_data.lambda_handler
+    events:
+      - schedule: rate(30 minutes)
+    environment:
+      NG_Terminal_URL: http://mip-prod-web.azurewebsites.net/InstantaneousViewFileDownload/DownloadFile
+      SNS_Topic_ARN:
+        Ref: SNSTopicNGProcess
+    package:
+      include:
+        - Lambda-NG-get-file
+      artifact: _build/gas-data-dev-getFileNG.zip
+
+#  GTS-get-file:
+ #   handler: get_GTS_data.lambda_handler
+  #  timeout: 180
+   # memorySize: 256
+   # events:
+   #   - schedule: rate(1 hour)
+   # environment:
+   #   SNS_Topic_ARN: arn:aws:sns:eu-west-2:451093560309:GTS_Terminals
+   #   SNS_Error_ARN: arn:aws:sns:eu-west-2:451093560309:NG_test
+   # package:
+    #  include:
+    #    - Lambda-GTS-get-file
+    #  artifact: _build/gas-data-dev-GTS-get-file.zip
+
+  processDataNG:
+    handler: process_NG_data.lambda_handler
+    events:
+      - sns: NGProcess
+    environment:
+      RDS_Instance_Endpoint: gasdb.csomj93pkcws.eu-west-2.rds.amazonaws.com
+      SNS_Error_ARN:
+        Ref: SNSTopicNGError
+    package:
+      include:
+        - Lambda-NG-process-data
+        - DB_Tools
+      artifact: _build/gas-data-dev-processDataNG.zip
+
+#  GTS-process-data:
+#    handler: process_GTS_data.lambda_handler
+#    events:
+#      - sns: arn:aws:sns:eu-west-2:451093560309:GTS_Terminals
+#    environment:
+#      RDS_Instance_Endpoint: gasdb.csomj93pkcws.eu-west-2.rds.amazonaws.com
+#      SNS_Error_ARN: arn:aws:sns:eu-west-2:451093560309:NG_test
+#    package:
+#      include:
+#        - Lambda-GTS-process-data
+#        - DB_Tools
+#      artifact: _build/gas-data-dev-GTS-process-data.zip
+
+  queryData:
+    handler: query_data.lambda_handler
+    environment:
+      RDS_Instance_Endpoint: gasdb.csomj93pkcws.eu-west-2.rds.amazonaws.com
+    events:
+      - http: ANY lambda_handler
+    package:
+      include:
+        - Lambda-API-Query
+        - DB_Tools
+      artifact: _build/gas-data-dev-queryData.zip
+
+resources:
+  Resources:
+    SNSTopicNGError:
+      Type: AWS::SNS::Topic
+    SNSTopicNGProcess:
+      Type: AWS::SNS::Topic
+
+
+

@@ -29,10 +29,9 @@ pointCodes = [{'Bocholtz TENP': '01',
               'Zone Oude Statenzijl': '23'
               }]
 
-#sns_topic_arn = os.getenv('SNS_Topic_ARN')
-#sns_error_arn = os.getenv('SNS_Error_ARN')
-sns_topic_arn = "arn:aws:sns:eu-west-2:451093560309:GTS_Terminals"
-sns_error_arn = "arn:aws:sns:eu-west-2:451093560309:NG_test"
+sns_topic_arn = os.getenv('SNS_Topic_ARN')
+sns_error_arn = os.getenv('SNS_Error_ARN')
+
 
 def lambda_handler(event, context):
     vs, vsg, ev, cookie, = establish_connection()
@@ -62,6 +61,7 @@ def establish_connection():
             continue
     publish_error(error)
     sys.exit()
+
 
 def get_csv_data(points, viewState, viewStateGenerator, eventValidation, cookie):
     pointCodeDict = get_point_code_dict(points)
