@@ -15,7 +15,8 @@ def query_directly():
 def query_via_api():
 
     url = "https://wjvfbfyc7c.execute-api.eu-west-2.amazonaws.com/dev/lambda_handler"
-    data = {"grid": "NG", "type":"timeframe", "from":"18/11/2017 21:00"}
+    data = {"grid": "GTS", "type":"timeframe", "from":"19/11/2017 17:00"}
+    #data = {"grid": "GTS", "type": "no_filter"}
 
     resp = requests.post(url=url, json=data)
 
