@@ -17,14 +17,6 @@ def get_data(url, url2):
     data_string = resp2.content.decode('utf-8')
 
     return data_string
-    '''
-    soup = BeautifulSoup(data_string, 'html.parser')
-    flows = soup.findAll("td", class_= "flow")
-    for f in flows:
-        heading = f.find("div", class_="heading").string
-        value = float(f.find("div", class_="value").string)
-        print(heading, value)
-    '''
 
 def send_data(sns_topic_arn, data_string):
 

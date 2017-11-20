@@ -21,3 +21,11 @@ class GTS_Flow(Base):
     value = Column(INTEGER)
     direction = Column(CHAR(10))
 
+
+class Norway_Flow(Base):
+    __tablename__ = 'NorwayData'
+
+    id = Column(CHAR(80), primary_key=True)
+    timestamp = Column(TIMESTAMP)
+    location = Column(CHAR(30))
+    value = Column(FLOAT)

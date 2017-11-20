@@ -20,6 +20,8 @@ def insert(records, gas_grid, rds_endpoint):
             new_flow = Flow_ORM.GTS_Flow(id=id, timestamp=timestamp, location=location, value=value, direction=direction)
         elif gas_grid == "NG":
             new_flow = Flow_ORM.NG_Flow(id=id, timestamp=timestamp, location=location, value=value)
+        elif gas_grid == "Norway":
+            new_flow = Flow_ORM.Norway_Flow(id=id, timestamp=timestamp, location=location, value=value)
         session.merge(new_flow)
 
     session.commit()

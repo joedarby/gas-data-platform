@@ -5,18 +5,6 @@ provider:
   runtime: python3.6
   role: arn:aws:iam::451093560309:role/service-role/gasDataRole
   region: eu-west-2
-#  iamRoleStatements:
-#    - Effect: Allow
-#      Action:
-#        - SNS:Publish
-#      Resource:
-#        Ref: SNSTopicNGProcess
-#    - Effect: Allow
-#      Action:
-#        - SNS:Publish
-#      Resource:
-#        Ref: SNSTopicNGError
-
 
 package:
   individually: true
@@ -65,7 +53,7 @@ functions:
   getFileNorway:
     handler: get_Norway_data.lambda_handler
     events:
-      - schedule: rate(1 minute)
+      - schedule: rate(10 minutes)
     environment:
       Norway_URL: http://flow.gassco.no/
       Norway_URL_2: http://flow.gassco.no/acceptDisclaimer
@@ -103,6 +91,21 @@ functions:
         - Lambda-GTS-process-data
         - DB_Tools
       artifact: _build/gas-data-dev-processDataGTS.zip
+
+  processDataNorway:
+    handler: process_Norway_data.lambda_handler
+    events:
+      - sns: NorwayProcess
+    environment:
+      RDS_Instance_Endpoint: gasdb.csomj93pkcws.eu-west-2.rds.amazonaws.com
+      SNS_Error_ARN:
+        Ref: SNSTopicNorwayError
+    package:
+      include:
+        - Lambda-Norway-process-data
+        - DB_Tools
+        - My_bs4
+      artifact: _build/gas-data-dev-processDataNorway.zip
 
   queryData:
     handler: query_data.lambda_handler

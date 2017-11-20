@@ -32,7 +32,12 @@ def get_results(eventBody, session):
     queryType = eventBody['type']
     results = None
 
-    flow_class = Flow_ORM.NG_Flow if query_gas_grid == "NG" else Flow_ORM.GTS_Flow
+    if query_gas_grid == "NG":
+        flow_class = Flow_ORM.NG_Flow
+    elif query_gas_grid == "GTS":
+        flow_class = Flow_ORM.GTS_Flow
+    else:
+        flow_class = Flow_ORM.Norway_Flow
 
     if queryType == "no_filter":
         results = session.query(flow_class)
