@@ -1,5 +1,5 @@
 
-terminal_map = {
+NG_terminal_map = {
     "BACTON BBL": "Bacton IP",
     "BACTON IC": "Bacton IP",
     "BACTON PERENCO": "Bacton UKCS",
@@ -29,6 +29,29 @@ terminal_map = {
     "THEDDLETHORPE": "Theddlethorpe",
     "BARROW SOUTH": "Barrow",
     "EASINGTON ROUGH": "Rough Storage"
+}
+
+GTS_terminal_map = {
+    'BOCHOLTZ TENP (OGE - FLX TENP)' : 'Bocholtz',
+    'BOCHOLTZ VETSCHAU (THYSSENGAS)': 'Bocholtz',
+    'DINXPERLO (BEW)': 'Other (DE)',
+    'EMDEN EPT (GASSCO)': 'Emden',
+    'EMDEN NPT (GASSCO)': 'Emden',
+    'HAANRADE (THYSSENGAS)': 'Other (DE)',
+    'HILVARENBEEK (FLUXYS)': 'Belgium',
+    'JULIANADORP (BBL)': 'BBL',
+    'OUDE STATENZIJL (GASCADE-H)': 'Oude Statenzijl',
+    'OUDE STATENZIJL (GTG NORD-G)': 'Oude Statenzijl',
+    'OUDE STATENZIJL (GUD-G)[OBEBG]': 'Oude Statenzijl',
+    'OUDE STATENZIJL (GUD-H)[OBEBH]': 'Oude Statenzijl',
+    'OUDE STATENZIJL (OGE)': 'Oude Statenzijl',
+    'S-GRAVENVOEREN (FLUXYS)': 'Belgium',
+    'TEGELEN (OGE)': 'Other (DE)',
+    'VLIEGHUIS (RWE)': 'Other (DE)',
+    'WINTERSWIJK (OGE)': 'Other (DE)',
+    'ZANDVLIET (FLUXYS-H)': 'Belgium',
+    'ZELZATE (FLUXYS)': 'Belgium',
+    'ZEVENAAR': 'Other (DE)'
 }
 
 

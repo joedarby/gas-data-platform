@@ -119,17 +119,41 @@ functions:
         - DB_Tools
       artifact: _build/gas-data-dev-queryData.zip
 
-  queryDataLast:
-    handler: query_data_last.lambda_handler
+  queryNGterminalList:
+    handler: query_NG_terminal_list.lambda_handler
     environment:
       RDS_Instance_Endpoint: gasdb.csomj93pkcws.eu-west-2.rds.amazonaws.com
     events:
-      - http: ANY last_vals
+      - http: GET NG-terminal-list
     package:
       include:
         - Lambda-API-Query
         - DB_Tools
-      artifact: _build/gas-data-dev-queryDataLast.zip
+      artifact: _build/gas-data-dev-queryNGterminalList.zip
+
+  queryGTSterminalList:
+    handler: query_GTS_terminal_list.lambda_handler
+    environment:
+      RDS_Instance_Endpoint: gasdb.csomj93pkcws.eu-west-2.rds.amazonaws.com
+    events:
+      - http: GET GTS-terminal-list
+    package:
+      include:
+        - Lambda-API-Query
+        - DB_Tools
+      artifact: _build/gas-data-dev-queryGTSterminalList.zip
+
+  queryNorwayList:
+    handler: query_Norway_list.lambda_handler
+    environment:
+      RDS_Instance_Endpoint: gasdb.csomj93pkcws.eu-west-2.rds.amazonaws.com
+    events:
+      - http: GET Norway-list
+    package:
+      include:
+        - Lambda-API-Query
+        - DB_Tools
+      artifact: _build/gas-data-dev-queryNorwayList.zip
 
 resources:
   Resources:
