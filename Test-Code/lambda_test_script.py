@@ -14,9 +14,11 @@ def query_directly():
 
 def query_via_api():
 
-    url = "https://wjvfbfyc7c.execute-api.eu-west-2.amazonaws.com/dev/lambda_handler"
-    #data = {"grid": "GTS", "type":"timeframe", "from":"19/11/2017 17:00"}
-    data = {"grid": "Norway", "type": "no_filter"}
+    #url = "https://wjvfbfyc7c.execute-api.eu-west-2.amazonaws.com/dev/lambda_handler"
+    url = "https://wjvfbfyc7c.execute-api.eu-west-2.amazonaws.com/dev/last_vals"
+    #data = {"grid": "Norway", "type":"timeframe", "from":"23/12/2017 23:00"}
+    #data = {"grid": "Norway", "type": "no_filter"}
+    data = {"grid": "NG"}
 
     resp = requests.post(url=url, json=data)
 

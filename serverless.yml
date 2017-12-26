@@ -119,6 +119,18 @@ functions:
         - DB_Tools
       artifact: _build/gas-data-dev-queryData.zip
 
+  queryDataLast:
+    handler: query_data_last.lambda_handler
+    environment:
+      RDS_Instance_Endpoint: gasdb.csomj93pkcws.eu-west-2.rds.amazonaws.com
+    events:
+      - http: ANY last_vals
+    package:
+      include:
+        - Lambda-API-Query
+        - DB_Tools
+      artifact: _build/gas-data-dev-queryDataLast.zip
+
 resources:
   Resources:
     SNSTopicNGError:
