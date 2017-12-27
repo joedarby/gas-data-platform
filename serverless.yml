@@ -155,6 +155,18 @@ functions:
         - DB_Tools
       artifact: _build/gas-data-dev-queryNorwayList.zip
 
+  queryChartData:
+    handler: query_chart_data.lambda_handler
+    environment:
+      RDS_Instance_Endpoint: gasdb.csomj93pkcws.eu-west-2.rds.amazonaws.com
+    events:
+      - http: GET chart
+    package:
+      include:
+        - Lambda-API-Query
+        - DB_Tools
+      artifact: _build/gas-data-dev-queryChartData.zip
+
 resources:
   Resources:
     SNSTopicNGError:
