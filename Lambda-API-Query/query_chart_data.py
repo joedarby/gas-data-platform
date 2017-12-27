@@ -75,7 +75,9 @@ def create_response(results):
                 data[location] = {}
             data[location][time] = value if direction == "Entry" else -value
 
-        response = {"statusCode": 200, "headers": {"Content-Type": "application/json"}, "body": str(data)}
+        data_wrapped = {"dataList": data}
+
+        response = {"statusCode": 200, "headers": {"Content-Type": "application/json"}, "body": str(data_wrapped)}
     else:
         response = {"statusCode": 404, "headers": {"Content-Type": "application/json"}}
 
