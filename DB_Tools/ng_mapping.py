@@ -55,6 +55,15 @@ GTS_terminal_map = {
 }
 
 
+def get_terminal_name(country, pipeline):
+    if country == "uk":
+        return NG_terminal_map.get(pipeline)
+    elif country == "nl":
+        return GTS_terminal_map.get(pipeline)
+    else:
+        return pipeline
+
+
 class Pipeline:
 
     def __init__(self, name, val, t):

@@ -3,8 +3,11 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import or_, and_
 from datetime import datetime
 
+#from DB_Tools import Connection, Flow_ORM, ng_mapping
 import Connection
 import Flow_ORM
+import ng_mapping
+#from pprint import pprint
 
 rds_endpoint = os.getenv('RDS_Instance_Endpoint')
 
@@ -21,7 +24,7 @@ def lambda_handler(event, context):
     session = Session()
 
     results = get_results(session, locations, country, timeFrom, timeTo)
-    response = create_response(results)
+    response = create_response(results, country)
 
     session.close()
     engine.dispose()
@@ -58,27 +61,54 @@ def get_results(session, locations, country, timeFrom, timeTo):
     return results
 
 
-def create_response(results):
+def create_response(results, country):
 
     if results:
-        data = {}
+
+        temp_terminal_map = {}
         for r in results:
             location = r.location
-            timestamp = r.timestamp
-            value = r.value
-            if hasattr(r, "direction"):
-                direction = r.direction
-            else:
-                direction = "Entry"
-            time = timestamp.timestamp()
-            if location not in data.keys():
-                data[location] = {}
-            data[location][time] = value if direction == "Entry" else -value
+            direction = r.direction if hasattr(r, "direction") else "Entry"
+            value = r.value if direction == "Entry" else -r.value
+            time = r.timestamp.timestamp()
+            terminal_name = ng_mapping.get_terminal_name(country, location)
 
-        data_wrapped = {"dataList": data}
+            if terminal_name not in temp_terminal_map.keys():
+                temp_terminal_map[terminal_name] = {}
+            if location not in temp_terminal_map[terminal_name].keys():
+                temp_terminal_map[terminal_name][location] = {}
+            temp_terminal_map[terminal_name][location][time] = value
 
-        response = {"statusCode": 200, "headers": {"Content-Type": "application/json"}, "body": str(data_wrapped)}
+        terminals = []
+        for tName in temp_terminal_map.keys():
+            if tName:
+                terminal = {"terminalName": tName,
+                            "pipelines": []}
+                for pName in temp_terminal_map[tName].keys():
+                    pipeline = {"pipelineName": pName,
+                                "data": temp_terminal_map[tName][pName]
+                                }
+                    terminal["pipelines"].append(pipeline)
+
+                terminals.append(terminal)
+
+        data_wrapped = {"dataList": terminals}
+
+        response = data_wrapped
+
+        #response = {"statusCode": 200, "headers": {"Content-Type": "application/json"}, "body": str(data_wrapped)}
     else:
         response = {"statusCode": 404, "headers": {"Content-Type": "application/json"}}
 
     return response
+
+# test_event = {"queryStringParameters": {"location": "all",
+#                                         "country": "uk",
+#                                         "timeFrom": "30/12/2017 13:00",
+#                                         "timeTo": "30/12/2017 13:12"
+#                                         }
+#               }
+# pprint(lambda_handler(test_event, ""))
+
+
+
