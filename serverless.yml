@@ -119,6 +119,18 @@ functions:
         - DB_Tools
       artifact: _build/gas-data-dev-queryData.zip
 
+  queryCurrentFlows:
+    handler: query_current_flows.lambda_handler
+    environment:
+      RDS_Instance_Endpoint: gasdb.csomj93pkcws.eu-west-2.rds.amazonaws.com
+    events:
+      - http: GET current-flows
+    package:
+      include:
+        - Lambda-API-Query
+        - DB_Tools
+      artifact: _build/gas-data-dev-queryCurrentFlows.zip
+
   queryNGterminalList:
     handler: query_NG_terminal_list.lambda_handler
     environment:
